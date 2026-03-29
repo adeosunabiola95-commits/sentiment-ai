@@ -6,7 +6,33 @@ const base =
     : "http://localhost:4000";
 
 function apiUnreachableMessage(apiBase: string) {
-  return `Could not reach the API at ${apiBase}. From the project root run "npm run dev" (starts the app and API together), or in a second terminal run "npm run dev:api". Check NEXT_PUBLIC_API_URL in frontend/.env.local if you use a custom API URL.`;
+  const isLocalDefault = apiBase === "http://localhost:4000";
+  if (isLocalDefault) {
+    return `API URL is not set. On Vercel: Project → Settings → Environment Variables → add NEXT_PUBLIC_API_URL = your Railway API URL (https://…, no trailing slash), then Redeploy. Locally: set it in frontend/.env.local and restart the dev server.`;
+  }
+  return `Could not reach the API at ${apiBase}. Check the URL, CORS, and that the Railway service is running.`;
+}
+
+/** Avoid opaque JSON.parse errors when the server returns HTML (404 page, wrong URL). */
+async function readJsonResponse(res: Response, context: string): Promise<unknown> {
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (!trimmed) {
+    throw new Error(
+      `Empty response (${context}, HTTP ${res.status}). Set NEXT_PUBLIC_API_URL on Vercel to your Railway API base URL and redeploy.`
+    );
+  }
+  const first = trimmed[0];
+  if (first !== "{" && first !== "[") {
+    throw new Error(
+      `API returned non-JSON (${context}, HTTP ${res.status}). First character is "${first}" — often HTML from a wrong URL. In Vercel → Settings → Environment Variables set NEXT_PUBLIC_API_URL=https://your-app.up.railway.app (no trailing slash), then Redeploy.`
+    );
+  }
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    throw new Error(`Invalid JSON from API (${context}). Check NEXT_PUBLIC_API_URL and redeploy the frontend.`);
+  }
 }
 
 export async function analyzePair(pair: string): Promise<AnalysisResult> {
@@ -21,7 +47,7 @@ export async function analyzePair(pair: string): Promise<AnalysisResult> {
     throw new Error(apiUnreachableMessage(base));
   }
 
-  const data = (await res.json()) as AnalysisResult & {
+  const data = (await readJsonResponse(res, "POST /analyze")) as AnalysisResult & {
     error?: string;
     message?: string;
   };
@@ -62,7 +88,7 @@ export async function fetchNewsHeadlines(
   } catch {
     throw new Error(apiUnreachableMessage(base));
   }
-  const data = (await res.json()) as NewsHeadlinesResponse & {
+  const data = (await readJsonResponse(res, "GET /news")) as NewsHeadlinesResponse & {
     error?: string;
     message?: string;
   };
@@ -102,7 +128,7 @@ export async function fetchForexDaily(pair: string): Promise<ForexDaily> {
   } catch {
     throw new Error(apiUnreachableMessage(base));
   }
-  const data = (await res.json()) as ForexDaily & {
+  const data = (await readJsonResponse(res, "GET /forex/daily")) as ForexDaily & {
     error?: string;
     message?: string;
   };
@@ -120,7 +146,7 @@ export async function fetchForexLatest(pair: string): Promise<ForexLatest> {
   } catch {
     throw new Error(apiUnreachableMessage(base));
   }
-  const data = (await res.json()) as ForexLatest & {
+  const data = (await readJsonResponse(res, "GET /forex/latest")) as ForexLatest & {
     error?: string;
     message?: string;
   };
