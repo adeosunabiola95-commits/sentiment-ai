@@ -45,7 +45,8 @@ See [GITHUB.md](./GITHUB.md). You need a repo Vercel/Railway can read.
 
 1. Create an account on **Vercel**.
 2. **Import** the same GitHub repo.
-3. Set **Root Directory** to `frontend` (or configure the monorepo so the build runs in `frontend`).
+3. Set **Root Directory** to **`frontend`** (Project → **Settings** → **General** → **Root Directory**).  
+   **Required for this repo.** If it stays at `.` (repo root), Vercel only installs the root `package.json` and the build fails with **`next: not found`** because dependencies in `frontend/` were never installed.
 4. **Environment variable:**
    - `NEXT_PUBLIC_API_URL` = your **backend URL** from step 2 (no trailing slash), e.g. `https://your-api.railway.app`
 
