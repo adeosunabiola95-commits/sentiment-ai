@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #111827;
+  /* Page dot grid — opacity of dot color (color-mix with transparent) */
+  --background-dot-mix: 6.4%;
+
+  /* Motion — emil-design-eng: strong curves, UI under ~300ms */
+  --ease-ui-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-ui-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-ui-fast: 150ms;
+  --duration-ui: 200ms;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f9fafb;
+  --color-elevated: #f3f4f6;
+  /* ~40% softer strokes vs previous hex (60% mix toward white) */
+  --color-border: color-mix(in srgb, #e5e7eb 60%, white);
+  --color-border-hairline: color-mix(in srgb, #f3f4f6 60%, white);
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-primary-active: #4f46e5;
+
+  --color-bullish: #10b981;
+  --color-bearish: #ef4444;
+  --color-sentiment-neutral: #9ca3af;
+
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+}
+
+html {
+  min-height: 100%;
+  background-color: #ffffff;
+}
+
+body {
+  min-height: 100%;
+  background-color: #ffffff;
+  /* Dotted grid — strength from --background-dot-mix (default 6.4%) */
+  background-image: radial-gradient(
+    color-mix(
+      in srgb,
+      var(--color-text-primary, #111827) var(--background-dot-mix),
+      transparent
+    )
+      1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+}
+
+p {
+  font-family: var(--font-sans);
+}
+
+/* --- Motion utilities (transform + opacity only; no transition: all) --- */
+
+.motion-press {
+  transition: transform var(--duration-ui-fast) var(--ease-ui-out);
+}
+
+.motion-press:active {
+  transform: scale(0.97);
+}
+
+.motion-press-primary {
+  transition:
+    transform var(--duration-ui-fast) var(--ease-ui-out),
+    background-color var(--duration-ui-fast) ease;
+}
+
+.motion-press-primary:active {
+  transform: scale(0.97);
+}
+
+/* Press + background/color on same control (avoid Tailwind transition-* overriding transform) */
+.motion-press-tint {
+  transition:
+    transform var(--duration-ui-fast) var(--ease-ui-out),
+    background-color var(--duration-ui-fast) ease,
+    color var(--duration-ui-fast) ease;
+}
+
+.motion-press-tint:active {
+  transform: scale(0.97);
+}
+
+.motion-focus-ring {
+  transition:
+    border-color var(--duration-ui-fast) ease,
+    box-shadow var(--duration-ui) var(--ease-ui-out);
+}
+
+.motion-surface {
+  transition:
+    transform var(--duration-ui-fast) var(--ease-ui-out),
+    box-shadow var(--duration-ui) var(--ease-ui-out),
+    border-color var(--duration-ui-fast) ease,
+    background-color var(--duration-ui-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .motion-surface-lift:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 14px rgba(15, 23, 42, 0.07),
+      0 1px 1px rgba(15, 23, 42, 0.03);
+  }
+
+  /* Nav links + index buttons: hover tint + press scale in one declaration */
+  .motion-nav-item {
+    transition:
+      transform var(--duration-ui-fast) var(--ease-ui-out),
+      background-color var(--duration-ui-fast) ease,
+      color var(--duration-ui-fast) ease;
+  }
+
+  .motion-nav-item:active {
+    transform: scale(0.97);
+  }
+
+  .motion-pill-row {
+    transition: background-color var(--duration-ui-fast) ease;
+  }
+
+  .motion-pill-row:hover {
+    background-color: color-mix(in srgb, var(--color-elevated) 88%, var(--color-text-tertiary));
+  }
+
+  .motion-float-bar {
+    transition:
+      box-shadow var(--duration-ui) var(--ease-ui-out),
+      transform var(--duration-ui-fast) var(--ease-ui-out);
+  }
+
+  .motion-float-bar:hover {
+    box-shadow:
+      0 10px 40px rgba(15, 23, 42, 0.1),
+      0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-toast-enter {
+  animation: toast-enter 0.28s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes insight-drawer-enter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes insight-drawer-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.insight-drawer-backdrop {
+  animation: insight-drawer-backdrop-enter 0.22s ease-out both;
+}
+
+.insight-drawer-panel {
+  animation: insight-drawer-enter 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes input-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-6px);
+  }
+  30% {
+    transform: translateX(5px);
+  }
+  45% {
+    transform: translateX(-4px);
+  }
+  60% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+}
+
+.animate-input-shake {
+  animation: input-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .insight-drawer-backdrop,
+  .insight-drawer-panel {
+    animation: none;
+  }
+
+  .insight-drawer-backdrop {
+    opacity: 1;
+  }
+
+  .insight-drawer-panel {
+    transform: none;
+  }
+
+  .animate-toast-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .motion-press:active,
+  .motion-press-primary:active,
+  .motion-press-tint:active,
+  .motion-nav-item:active {
+    transform: none;
+  }
+
+  .motion-surface,
+  .motion-surface-lift,
+  .motion-float-bar {
+    transition-duration: 0.01ms;
+  }
+
+  .motion-surface-lift:hover {
+    transform: none;
+  }
+
+  .animate-input-shake {
+    animation: none;
+  }
+}
